@@ -27,6 +27,7 @@ public class FileController {
 
         try {
             InputStream inputStream = file.getInputStream();
+            assert contentType != null;
             return switch (contentType) {
                 case "text/csv" -> fileProcessingService.processCsv(inputStream);
                 case "application/pdf" -> fileProcessingService.processPdf(inputStream);

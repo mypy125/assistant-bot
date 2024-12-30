@@ -15,5 +15,14 @@ logging:
   level:
     org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG
 
-
+resilience4j:
+  retry:
+    instances:
+      openai-api:
+        max-attempts: 3
+        wait-duration: 1000ms
+        retry-exceptions:
+          - org.springframework.web.client.HttpServerErrorException
+        ignore-exceptions:
+          - java.net.ConnectException
 

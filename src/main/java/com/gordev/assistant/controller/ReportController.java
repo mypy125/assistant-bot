@@ -1,10 +1,8 @@
 package com.gordev.assistant.controller;
 
 import com.gordev.assistant.service.ReportService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -17,7 +15,9 @@ public class ReportController {
     }
 
     @PostMapping("/generate")
-    public Mono<String>generateReport(@RequestBody String report){
-        return reportService.generateResponse(report);
+    public Mono<String> generateReport(@RequestPart(value = "report", required = false) String report,
+                                        @RequestPart(value = "file", required = false) MultipartFile file)
+    {
+        return reportService.generateResponse(report, file);
     }
 }
