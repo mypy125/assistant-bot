@@ -1,12 +1,16 @@
 package com.gordev.assistant.service.impl;
 
+import com.gordev.assistant.config.OpenAiProperties;
 import com.gordev.assistant.service.FileProcessingService;
 import com.opencsv.CSVReader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -19,9 +23,15 @@ import java.util.stream.Collectors;
 @Service
 public class FileProcessingServiceImpl implements FileProcessingService {
     private final WebClient webClient;
+    private final OpenAiProperties prop;
 
-    public FileProcessingServiceImpl(@Qualifier("webClientBuilderWithLogging") WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.build();
+    @Autowired
+    public FileProcessingServiceImpl(@Qualifier("webClientBuilderWithLogging") WebClient.Builder webClientBuilder, OpenAiProperties prop) {
+       this.webClient = webClientBuilder
+               .baseUrl(prop.getApiUrl())
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer "+prop.getApiKey())
+                .build();
+        this.prop = prop;
     }
 
     @Override
@@ -67,11 +77,28 @@ public class FileProcessingServiceImpl implements FileProcessingService {
 
 
     private Mono<String> sendToOpenAI(String prompt) {
+        String requestBody = """
+            {
+                "model": "gpt-4",
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "%s"
+                    }
+                ]
+            }
+            """.formatted(prompt);
+
+        System.out.println("Request Body: " + requestBody);
+
         return webClient.post()
-                .uri("/completions")
-                .bodyValue("{\n  \"model\": \"gpt-4\",\n  \"prompt\": \"" + prompt + "\",\n  \"max_tokens\": 500\n}")
+                .uri("/chat/completions")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + prop.getApiKey())
+                .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnError(error -> System.err.println("Error sending to OpenAI: " + error.getMessage()));
     }
+
 }

@@ -1,6 +1,8 @@
 package com.gordev.assistant.controller;
 
 import com.gordev.assistant.service.FileProcessingService;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,13 +15,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/file")
 public class FileController {
     private final FileProcessingService fileProcessingService;
 
-    public FileController(FileProcessingService fileProcessingService) {
-        this.fileProcessingService = fileProcessingService;
-    }
 
     @PostMapping(value = "/process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<String> processFile(@RequestPart("file") MultipartFile file) {

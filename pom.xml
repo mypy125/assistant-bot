@@ -31,6 +31,7 @@
 		<open-csv.version>5.7.1</open-csv.version>
 		<pdf-box.version>2.0.29</pdf-box.version>
 		<poi-ooxml.version>5.2.3</poi-ooxml.version>
+		<project-lombok.version>1.18.34</project-lombok.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -68,6 +69,12 @@
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi-ooxml</artifactId>
 			<version>${poi-ooxml.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${project-lombok.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

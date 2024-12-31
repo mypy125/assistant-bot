@@ -23,6 +23,9 @@ public class WebClientLoggingConfig {
     private ExchangeFilterFunction logRequest(){
         return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
             logger.info("Request "+ clientRequest.method()+" "+clientRequest.url());
+            clientRequest.headers().forEach((name, values) ->
+                    values.forEach(value -> logger.info("Header " + name + " = " + value))
+            );
             return Mono.just(clientRequest);
         });
     }
@@ -30,7 +33,10 @@ public class WebClientLoggingConfig {
     private ExchangeFilterFunction logResponse(){
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             logger.info("Response "+ clientResponse.statusCode());
-            return Mono.just(clientResponse);
+            return clientResponse.bodyToMono(String.class)
+                    .doOnTerminate(() -> logger.info("Response Body " + clientResponse.statusCode()))
+                    .doOnNext(body -> logger.info("Response Body " + body))
+                    .then(Mono.just(clientResponse));
         });
     }
 }
